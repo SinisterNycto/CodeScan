@@ -3,12 +3,10 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import CodeEditor from "./components/CodeEditor";
 import LanguageSelect from "./components/LanguageSelect";
-import { GoogleGenAI } from "@google/genai";
 import Markdown from "react-markdown";
 import { CircleLoader } from "react-spinners";
 
 // Monaco Workers
-
 import "monaco-editor/esm/vs/editor/editor.worker.js?worker";
 import "monaco-editor/esm/vs/language/json/json.worker.js?worker";
 import "monaco-editor/esm/vs/language/css/css.worker.js?worker";
@@ -22,16 +20,31 @@ const App = () => {
   const [response, setResponse] = useState("");
   const [theme, setTheme] = useState("dark");
 
-  const ai = new GoogleGenAI({
-    apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
-  });
-
   function toggleTheme() {
     setTheme(theme === "dark" ? "light" : "dark");
   }
 
-  // Review Code Function
+  function extractText(data) {
+    // direct text output
+    if (typeof data.text === "string") {
+      return data.text;
+    }
 
+    // or structured gemini output
+    try {
+      const part = data?.candidates?.[0]?.content?.parts?.find(
+        (p) => typeof p.text === "string"
+      );
+      if (part) return part.text;
+    } catch (err) {
+      console.error("Extract parse error:", err);
+    }
+
+    // fallback: pretty-print response
+    return JSON.stringify(data, null, 2);
+  }
+
+  // Review Code Function
   async function reviewCode() {
     if (!language) return alert("Please select a language first!");
 
@@ -41,9 +54,7 @@ const App = () => {
     try {
       const res = await fetch("/api/genai", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "gemini-2.5-flash",
           prompt: `
@@ -60,14 +71,12 @@ Review the following code and provide:
 \`\`\`${language}
 ${code}
 \`\`\`
-        `,
+          `,
         }),
       });
 
       const data = await res.json();
-
-      // The server returns raw Gemini response; choose how to display it:
-      setResponse(data.text || JSON.stringify(data, null, 2));
+      setResponse(extractText(data));
     } catch (err) {
       console.error("Review Error:", err);
       setResponse("❌ Error while reviewing code.");
@@ -76,8 +85,7 @@ ${code}
     setLoading(false);
   }
 
-  // Fix Code function
-
+  // Fix Code Function
   async function fixCode() {
     if (!language) return alert("Please select a language first!");
 
@@ -87,9 +95,7 @@ ${code}
     try {
       const res = await fetch("/api/genai", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "gemini-2.5-flash",
           prompt: `
@@ -104,14 +110,12 @@ Fix this code by:
 \`\`\`${language}
 ${code}
 \`\`\`
-        `,
+          `,
         }),
       });
 
       const data = await res.json();
-
-      // The API returns text() from Gemini
-      setResponse(data.text || JSON.stringify(data, null, 2));
+      setResponse(extractText(data));
     } catch (err) {
       console.error("Fix Error:", err);
       setResponse("❌ Error while fixing code.");
@@ -120,8 +124,6 @@ ${code}
     setLoading(false);
   }
 
-  // return UI
-
   return (
     <>
       <Navbar theme={theme} toggleTheme={toggleTheme} />
@@ -129,7 +131,7 @@ ${code}
         className={`main flex justify-between ${theme}`}
         style={{ height: "calc(100vh - 90px)" }}
       >
-        {/* Left Panel */}
+        {/* LEFT PANEL */}
         <div
           className={`left w-[50%] p-6 flex flex-col gap-4 h-full 
   ${
@@ -138,7 +140,7 @@ ${code}
       : "bg-white text-black shadow-md border border-gray-200"
   }`}
         >
-          {/* Language & Buttons */}
+          {/* Language + Buttons */}
           <div className="flex items-center gap-4 w-full mb-2 mt-4">
             <LanguageSelect
               language={language}
@@ -188,7 +190,7 @@ ${code}
           </div>
         </div>
 
-        {/* Right Panel */}
+        {/* RIGHT PANEL */}
         <div
           className={`right overflow-scroll w-[50%] p-4 
   ${
@@ -203,8 +205,7 @@ ${code}
     theme === "dark"
       ? "text-white border-[#27272a]"
       : "text-black border-gray-300"
-  }
-`}
+  }`}
           >
             <p className="font-bold text-lg">Response</p>
           </div>
