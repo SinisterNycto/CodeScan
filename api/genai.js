@@ -6,9 +6,9 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Only POST allowed" });
     }
 
-    const body = req.body; // Vercel auto-parses JSON
+    const body = req.body;
 
-    if (!body?.prompt) {
+    if (!body || !body.prompt) {
       return res.status(400).json({ error: "Missing prompt" });
     }
 
@@ -21,18 +21,18 @@ export default async function handler(req, res) {
 
     const response = await ai.models.generateContent({
       model: body.model || "gemini-2.5-flash",
-      content: body.prompt, 
+      contents: [
+        { text: body.prompt }
+      ],
     });
 
-    // Extract text safely
+    // Extract safe text
     const output =
-      response.text ??
-      response.candidates?.[0]?.content?.parts?.find(p => p.text)?.text ??
-      null;
+      response.text?.() ??
+      response.candidates?.[0]?.content?.parts?.[0]?.text ??
+      JSON.stringify(response, null, 2);
 
-    return res.status(200).json({
-      text: output || JSON.stringify(response, null, 2),
-    });
+    return res.status(200).json({ text: output });
   } catch (err) {
     console.error("Server error:", err);
     return res.status(500).json({
