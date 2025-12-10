@@ -39,9 +39,14 @@ const App = () => {
     setResponse("");
 
     try {
-      const res = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `
+      const res = await fetch("/api/genai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gemini-2.5-flash",
+          prompt: `
 You are an expert-level ${language} developer.
 
 Review the following code and provide:
@@ -56,9 +61,13 @@ Review the following code and provide:
 ${code}
 \`\`\`
         `,
+        }),
       });
 
-      setResponse(res.text);
+      const data = await res.json();
+
+      // The server returns raw Gemini response; choose how to display it:
+      setResponse(data.text || JSON.stringify(data, null, 2));
     } catch (err) {
       console.error("Review Error:", err);
       setResponse("❌ Error while reviewing code.");
@@ -76,9 +85,14 @@ ${code}
     setResponse("");
 
     try {
-      const res = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `
+      const res = await fetch("/api/genai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gemini-2.5-flash",
+          prompt: `
 You are an expert ${language} developer.
 
 Fix this code by:
@@ -91,9 +105,13 @@ Fix this code by:
 ${code}
 \`\`\`
         `,
+        }),
       });
 
-      setResponse(res.text);
+      const data = await res.json();
+
+      // The API returns text() from Gemini
+      setResponse(data.text || JSON.stringify(data, null, 2));
     } catch (err) {
       console.error("Fix Error:", err);
       setResponse("❌ Error while fixing code.");
