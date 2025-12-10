@@ -21,14 +21,11 @@ export default async function handler(req, res) {
 
     const response = await ai.models.generateContent({
       model: body.model || "gemini-2.5-flash",
-      contents: [
-        { text: body.prompt }
-      ],
+      contents: [{ text: body.prompt }],
     });
 
-    // Extract safe text
     const output =
-      response.text?.() ??
+      response.text ??
       response.candidates?.[0]?.content?.parts?.[0]?.text ??
       JSON.stringify(response, null, 2);
 
