@@ -6,7 +6,6 @@ import LanguageSelect from "./components/LanguageSelect";
 import Markdown from "react-markdown";
 import { CircleLoader } from "react-spinners";
 
-// Monaco Workers
 import "monaco-editor/esm/vs/editor/editor.worker.js?worker";
 import "monaco-editor/esm/vs/language/json/json.worker.js?worker";
 import "monaco-editor/esm/vs/language/css/css.worker.js?worker";
@@ -44,7 +43,6 @@ const App = () => {
     return JSON.stringify(data, null, 2);
   }
 
-  // Review Code Function
   async function reviewCode() {
     if (!language) return alert("Please select a language first!");
 
@@ -85,7 +83,6 @@ ${code}
     setLoading(false);
   }
 
-  // Fix Code Function
   async function fixCode() {
     if (!language) return alert("Please select a language first!");
 
@@ -131,7 +128,7 @@ ${code}
         className={`main flex justify-between ${theme}`}
         style={{ height: "calc(100vh - 90px)" }}
       >
-        {/* LEFT PANEL */}
+        
         <div
           className={`left w-[50%] p-6 flex flex-col gap-4 h-full 
   ${
@@ -140,7 +137,7 @@ ${code}
       : "bg-white text-black shadow-md border border-gray-200"
   }`}
         >
-          {/* Language + Buttons */}
+          
           <div className="flex items-center gap-4 w-full mb-2 mt-4">
             <LanguageSelect
               language={language}
@@ -179,7 +176,6 @@ ${code}
             </button>
           </div>
 
-          {/* Code Editor */}
           <div className="flex-1 rounded-lg overflow-hidden border border-zinc-700">
             <CodeEditor
               language={language}
@@ -190,7 +186,6 @@ ${code}
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
         <div
           className={`right overflow-scroll w-[50%] p-4 
   ${
