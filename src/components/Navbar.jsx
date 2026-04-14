@@ -14,13 +14,11 @@ const Navbar = ({ theme, toggleTheme }) => {
   `}
       style={{ padding: "0px 150px" }}
     >
-      {/* Logo */}
       <div className="logo flex items-center gap-[10px]">
         <BrainCog size={50} color="#4f46e5" />
         <span className="text-2xl font-bold ml-2">CodeScan</span>
       </div>
 
-      {/* Theme Toggle Button */}
       <div className="icons flex items-center gap-[15px]">
         <button
           onClick={toggleTheme}
